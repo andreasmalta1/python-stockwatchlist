@@ -1,50 +1,67 @@
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
 import yfinance as yf
-
+import gspread
 
 def main():
-    wb = load_workbook(filename="Stocks Watchlist.xlsx")
-    ws = wb["Sheet1"]
-    l_row = len(ws["A"])
-    ticker = []
-    skip_rows = []
-    for row in range(3, l_row + 1):
-        if ws["A" + str(row)].value == "CCTrader" or ws["A" + str(row)].value == "Watchlist":
-            ticker.append(None)
-            skip_rows.append(row)
-        else:
-            ticker.append(yf.Ticker(ws["A" + str(row)].value))
 
-    list_info = ["regularMarketPrice", "fiftyTwoWeekLow", "fiftyTwoWeekHigh", "marketCap", "Short Long Term Debt",
-                 "revenue", "netIncomeToCommon", "trailingEps", "assets", "liabilities", "dividendRate", "sector"]
-    information = {}
+    # Make for all sections
 
-    for stock in ticker:
-        if stock:
-            information[stock] = {}
-            for item in list_info:
-                try:
-                    information[stock][item] = stock.info[item]
-                except KeyError:
-                    information[stock][item] = None
+    sa = gspread.service_account(filename='service_account.json')
+    sh = sa.open('Stocks Watchlist Updated')
+    whs = sh.worksheet('Sheet1')
+    
+    ticker_list = whs.col_values(1)
 
-    skip_columns = [6, 14, 15, 17]
-    col = 3
-    row = 3
-    for stock_id, stock_info in information.items():
-        for key in stock_info:
-            while col in skip_columns:
-                col += 1
-            char = get_column_letter(col)
-            ws[char + str(row)] = stock_info[key]
-            col += 1
-        row += 1
-        while row in skip_rows:
-            row += 1
-        col = 3
+    information = {
+        'ticker': [],
+        'regularMarketPrice': [],
+        'fiftyTwoWeekLow': [],
+        'fiftyTwoWeekHigh': [],
+        'marketCap': [],
+        'totalRevenue': [],
+        'netIncomeToCommon': [],
+        'trailingEps': [],
+        'dividendRate': [],
+        'sector': []}
+    
+    moneybase_tickers = []
+    watchlist_tickers = []
 
-    wb.save("Stocks Watchlist.xlsx")
+    for etoro_counter, ticker in enumerate(ticker_list):
+        if ticker == 'MoneyBase':
+            break
+        if ticker == 'Ticker' or ticker == 'EToro':
+            continue
+        information['ticker'].append([yf.Ticker(ticker)])
 
+    for ticker in information['ticker']:
+        ticker = ticker[0]
+        for key in information:
+            if key == 'ticker':
+                continue
+            try:
+                information[key].append([ticker.info[key]])
+            except KeyError:
+                information[key].append([""])
+
+    whs.batch_update([
+        {'range': 'C3:C' + str(etoro_counter),
+        'values': information['regularMarketPrice']},
+        {'range': 'D3:D' + str(etoro_counter),
+        'values': information['fiftyTwoWeekLow']},
+        {'range': 'E3:E' + str(etoro_counter),
+        'values': information['fiftyTwoWeekHigh']},
+        {'range': 'G3:G' + str(etoro_counter),
+        'values': information['marketCap']},
+        {'range': 'I3:I' + str(etoro_counter),
+        'values': information['totalRevenue']},
+        {'range': 'J3:J' + str(etoro_counter),
+        'values': information['netIncomeToCommon']},
+        {'range': 'K3:K' + str(etoro_counter),
+        'values': information['trailingEps']},
+        {'range': 'P3:P' + str(etoro_counter),
+        'values': information['dividendRate']},
+        {'range': 'R3:R' + str(etoro_counter),
+        'values': information['sector']}
+    ])
 
 main()
