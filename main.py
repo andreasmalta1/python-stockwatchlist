@@ -18,7 +18,6 @@ INFO_KEYS = [
 
 
 def main():
-
     sa = gspread.service_account(filename="service_account.json")
     sh = sa.open("Stocks Watchlist")
     whs = sh.worksheet("Sheet1")
@@ -49,14 +48,17 @@ def main():
             if key == "ticker":
                 continue
 
-            print(ticker)
-
             if key in FAST_INFO_KEYS:
-                information[key].append(
-                    ticker.fast_info["regular_market_previous_close"]
-                )
+                try:
+                    information[key].append(ticker.fast_info[key])
+                except KeyError:
+                    information[key].append([""])
+
             if key in INFO_KEYS:
-                information[key].append(ticker.info[key])
+                try:
+                    information[key].append(ticker.info[key])
+                except KeyError:
+                    information[key].append([""])
 
     whs.batch_update(
         [
