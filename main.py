@@ -76,7 +76,7 @@ def main():
             },
             {
                 "range": "H2" + ":H" + str(last_row),
-                "values": information["marketCap"],
+                "values": information["market_cap"],
             },
             {
                 "range": "I2" + ":I" + str(last_row),
