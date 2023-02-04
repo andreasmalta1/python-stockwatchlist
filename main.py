@@ -23,10 +23,11 @@ def main():
     whs = sh.worksheet("Sheet1")
 
     ticker_list = whs.col_values(2)
+    ticker_list.pop(0)
     last_row = len(ticker_list)
+    last_row += 1
 
     information = {
-        "ticker": [],
         "regular_market_previous_close": [],
         "year_high": [],
         "year_low": [],
@@ -38,25 +39,20 @@ def main():
         "sector": [],
     }
 
-    for i in range(2, len(ticker_list) + 1):
-        information["ticker"].append([yf.Ticker(ticker_list[i - 1])])
-
-    for ticker in information["ticker"]:
-        ticker = ticker[0]
+    for ticker in ticker_list:
+        ticker = yf.Ticker(ticker)
         print(ticker)
-        for key in information:
-            if key == "ticker":
-                continue
 
+        for key in information:
             if key in FAST_INFO_KEYS:
                 try:
-                    information[key].append(ticker.fast_info[key])
+                    information[key].append([ticker.fast_info[key]])
                 except KeyError:
                     information[key].append([""])
 
             if key in INFO_KEYS:
                 try:
-                    information[key].append(ticker.info[key])
+                    information[key].append([ticker.info[key]])
                 except KeyError:
                     information[key].append([""])
 
