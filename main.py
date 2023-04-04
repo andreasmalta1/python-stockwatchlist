@@ -1,20 +1,16 @@
-import yfinance as yf
+from yahooquery import Ticker
 import gspread
 
-
-FAST_INFO_KEYS = [
-    "regular_market_previous_close",
-    "year_high",
-    "year_low",
-    "market_cap",
-]
-INFO_KEYS = [
-    "totalRevenue",
-    "netIncomeToCommon",
-    "trailingEps",
-    "dividendRate",
-    "sector",
-]
+close_price = []
+price_low = []
+price_high = []
+market_cap = []
+yearly_revenue = []
+yearly_earnings = []
+trailing_eps = []
+trailing_pe = []
+dividend_rate = []
+stock_sector = []
 
 
 def main():
@@ -27,72 +23,85 @@ def main():
     last_row = len(ticker_list)
     last_row += 1
 
-    information = {
-        "regular_market_previous_close": [],
-        "year_high": [],
-        "year_low": [],
-        "market_cap": [],
-        "totalRevenue": [],
-        "netIncomeToCommon": [],
-        "trailingEps": [],
-        "dividendRate": [],
-        "sector": [],
-    }
-
     for ticker in ticker_list:
-        ticker = yf.Ticker(ticker)
         print(ticker)
+        ticker_obj = Ticker(ticker)
 
-        for key in information:
-            if key in FAST_INFO_KEYS:
-                try:
-                    information[key].append([ticker.fast_info[key]])
-                except KeyError:
-                    information[key].append([""])
+        close_price.append(
+            [ticker_obj.summary_detail[ticker].get("regularMarketPreviousClose")]
+        )
+        price_low.append([ticker_obj.summary_detail[ticker].get("fiftyTwoWeekLow")])
+        price_high.append([ticker_obj.summary_detail[ticker].get("fiftyTwoWeekHigh")])
+        market_cap.append([ticker_obj.summary_detail[ticker].get("marketCap")])
 
-            if key in INFO_KEYS:
-                try:
-                    information[key].append([ticker.info[key]])
-                except KeyError:
-                    information[key].append([""])
+        try:
+            yearly_revenue.append(
+                [
+                    ticker_obj.earnings[ticker]["financialsChart"]["yearly"][-1].get(
+                        "revenue"
+                    )
+                ]
+            )
+        except TypeError:
+            yearly_revenue.append([None])
+
+        try:
+            yearly_earnings.append(
+                [
+                    ticker_obj.earnings[ticker]["financialsChart"]["yearly"][-1].get(
+                        "earnings"
+                    )
+                ]
+            )
+        except TypeError:
+            yearly_earnings.append([None])
+
+        trailing_eps.append([ticker_obj.key_stats[ticker].get("trailingEps")])
+        trailing_pe.append([ticker_obj.summary_detail[ticker].get("trailingPE")])
+        dividend_rate.append([ticker_obj.summary_detail[ticker].get("dividendRate")])
+        stock_sector.append([ticker_obj.summary_profile[ticker].get("sector")])
 
     whs.batch_update(
         [
             {
                 "range": "D2" + ":D" + str(last_row),
-                "values": information["regular_market_previous_close"],
+                "values": close_price,
             },
             {
                 "range": "E2" + ":E" + str(last_row),
-                "values": information["year_low"],
+                "values": price_low,
             },
             {
                 "range": "F2" + ":F" + str(last_row),
-                "values": information["year_high"],
+                "values": price_high,
             },
             {
                 "range": "H2" + ":H" + str(last_row),
-                "values": information["market_cap"],
+                "values": market_cap,
             },
             {
                 "range": "I2" + ":I" + str(last_row),
-                "values": information["totalRevenue"],
+                "values": yearly_revenue,
             },
             {
                 "range": "J2" + ":J" + str(last_row),
-                "values": information["netIncomeToCommon"],
+                "values": yearly_earnings,
             },
             {
                 "range": "K2" + ":K" + str(last_row),
-                "values": information["trailingEps"],
+                "values": trailing_eps,
+            },
+            {
+                "range": "L2" + ":K" + str(last_row),
+                "values": trailing_pe,
             },
             {
                 "range": "M2" + ":M" + str(last_row),
-                "values": information["dividendRate"],
+                "values": dividend_rate,
             },
             {
                 "range": "O2" + ":O" + str(last_row),
-                "values": information["sector"],
+                "values": stock_sector,
             },
         ]
     )
