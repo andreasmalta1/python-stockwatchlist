@@ -56,10 +56,18 @@ def main():
         except TypeError:
             yearly_earnings.append([None])
 
-        trailing_eps.append([ticker_obj.key_stats[ticker].get("trailingEps")])
+        try:
+            trailing_eps.append([ticker_obj.key_stats[ticker].get("trailingEps")])
+        except AttributeError:
+            trailing_eps.append([None])
+
         trailing_pe.append([ticker_obj.summary_detail[ticker].get("trailingPE")])
         dividend_rate.append([ticker_obj.summary_detail[ticker].get("dividendRate")])
-        stock_sector.append([ticker_obj.summary_profile[ticker].get("sector")])
+
+        try:
+            stock_sector.append([ticker_obj.summary_profile[ticker].get("sector")])
+        except AttributeError:
+            stock_sector.append([None])
 
     whs.batch_update(
         [
