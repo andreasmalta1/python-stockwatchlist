@@ -27,46 +27,88 @@ def main():
         print(ticker)
         ticker_obj = Ticker(ticker)
 
-        close_price.append(
-            [ticker_obj.summary_detail[ticker].get("regularMarketPreviousClose")]
+        close_price_value = ticker_obj.summary_detail[ticker].get(
+            "regularMarketPreviousClose"
         )
-        price_low.append([ticker_obj.summary_detail[ticker].get("fiftyTwoWeekLow")])
-        price_high.append([ticker_obj.summary_detail[ticker].get("fiftyTwoWeekHigh")])
-        market_cap.append([ticker_obj.summary_detail[ticker].get("marketCap")])
+        if not close_price_value:
+            close_price.append([None])
+        else:
+            close_price.append([close_price_value])
+
+        price_low_value = ticker_obj.summary_detail[ticker].get("fiftyTwoWeekLow")
+        if not price_low_value:
+            price_low.append([None])
+        else:
+            price_low.append([price_low_value])
+
+        price_high_value = ticker_obj.summary_detail[ticker].get("fiftyTwoWeekHigh")
+        if not price_low_value:
+            price_high.append([None])
+        else:
+            price_high.append([price_high_value])
+
+        market_cap_value = ticker_obj.summary_detail[ticker].get("marketCap")
+        if not market_cap_value:
+            market_cap.append([None])
+        else:
+            market_cap.append([market_cap_value])
 
         try:
-            yearly_revenue.append(
-                [
-                    ticker_obj.earnings[ticker]["financialsChart"]["yearly"][-1].get(
-                        "revenue"
-                    )
-                ]
-            )
+            yearly_revenue_value = ticker_obj.earnings[ticker]["financialsChart"][
+                "yearly"
+            ][-1].get("revenue")
+            if not yearly_revenue_value:
+                yearly_revenue.append([None])
+            else:
+                yearly_revenue.append([yearly_revenue_value])
+
         except TypeError:
             yearly_revenue.append([None])
 
         try:
-            yearly_earnings.append(
-                [
-                    ticker_obj.earnings[ticker]["financialsChart"]["yearly"][-1].get(
-                        "earnings"
-                    )
-                ]
-            )
+            yearly_earnings_value = ticker_obj.earnings[ticker]["financialsChart"][
+                "yearly"
+            ][-1].get("earnings")
+            if not yearly_earnings_value:
+                yearly_earnings.append([None])
+            else:
+                yearly_earnings.append([yearly_earnings_value])
+
         except TypeError:
             yearly_earnings.append([None])
 
         try:
-            trailing_eps.append([ticker_obj.key_stats[ticker].get("trailingEps")])
+            trailing_eps_value = ticker_obj.key_stats[ticker].get("trailingEps")
+            if not trailing_eps_value:
+                trailing_eps.append([None])
+            else:
+                trailing_eps.append([trailing_eps_value])
         except AttributeError:
             trailing_eps.append([None])
+        except TypeError:
+            trailing_eps.append([None])
 
-        trailing_pe.append([ticker_obj.summary_detail[ticker].get("trailingPE")])
-        dividend_rate.append([ticker_obj.summary_detail[ticker].get("dividendRate")])
+        trailing_pe_value = ticker_obj.summary_detail[ticker].get("trailingPE")
+        if not trailing_pe_value:
+            trailing_pe.append([None])
+        else:
+            trailing_pe.append([trailing_pe_value])
+
+        dividend_rate_value = ticker_obj.summary_detail[ticker].get("dividendRate")
+        if not dividend_rate_value:
+            dividend_rate.append([None])
+        else:
+            dividend_rate.append([dividend_rate_value])
 
         try:
-            stock_sector.append([ticker_obj.summary_profile[ticker].get("sector")])
+            stock_sector_value = ticker_obj.summary_detail[ticker].get("sector")
+            if not stock_sector_value:
+                stock_sector.append([None])
+            else:
+                stock_sector.append([stock_sector_value])
         except AttributeError:
+            stock_sector.append([None])
+        except TypeError:
             stock_sector.append([None])
 
     whs.batch_update(
