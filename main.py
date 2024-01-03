@@ -18,7 +18,7 @@ def main():
     sh = sa.open("Stocks Watchlist")
     whs = sh.worksheet("Sheet1")
 
-    ticker_list = whs.col_values(2)
+    ticker_list = whs.col_values(1)
     ticker_list.pop(0)
     last_row = len(ticker_list)
     last_row += 1
@@ -31,25 +31,25 @@ def main():
             "regularMarketPreviousClose"
         )
         if not close_price_value:
-            close_price.append([None])
+            close_price.append(["NA"])
         else:
             close_price.append([close_price_value])
 
         price_low_value = ticker_obj.summary_detail[ticker].get("fiftyTwoWeekLow")
         if not price_low_value:
-            price_low.append([None])
+            price_low.append(["NA"])
         else:
             price_low.append([price_low_value])
 
         price_high_value = ticker_obj.summary_detail[ticker].get("fiftyTwoWeekHigh")
         if not price_low_value:
-            price_high.append([None])
+            price_high.append(["NA"])
         else:
             price_high.append([price_high_value])
 
         market_cap_value = ticker_obj.summary_detail[ticker].get("marketCap")
         if not market_cap_value:
-            market_cap.append([None])
+            market_cap.append(["NA"])
         else:
             market_cap.append([market_cap_value])
 
@@ -58,45 +58,39 @@ def main():
                 "yearly"
             ][-1].get("revenue")
             if not yearly_revenue_value:
-                yearly_revenue.append([None])
+                yearly_revenue.append(["NA"])
             else:
                 yearly_revenue.append([yearly_revenue_value])
 
         except TypeError:
-            yearly_revenue.append([None])
+            yearly_revenue.append(["NA"])
 
         try:
             yearly_earnings_value = ticker_obj.earnings[ticker]["financialsChart"][
                 "yearly"
             ][-1].get("earnings")
             if not yearly_earnings_value:
-                yearly_earnings.append([None])
+                yearly_earnings.append(["NA"])
             else:
                 yearly_earnings.append([yearly_earnings_value])
 
         except TypeError:
-            yearly_earnings.append([None])
+            yearly_earnings.append(["NA"])
 
         try:
             trailing_eps_value = ticker_obj.key_stats[ticker].get("trailingEps")
             if not trailing_eps_value:
-                trailing_eps.append([None])
+                trailing_eps.append(["NA"])
             else:
                 trailing_eps.append([trailing_eps_value])
         except AttributeError:
-            trailing_eps.append([None])
+            trailing_eps.append(["NA"])
         except TypeError:
-            trailing_eps.append([None])
-
-        trailing_pe_value = ticker_obj.summary_detail[ticker].get("trailingPE")
-        if not trailing_pe_value:
-            trailing_pe.append([None])
-        else:
-            trailing_pe.append([trailing_pe_value])
+            trailing_eps.append(["NA"])
 
         dividend_rate_value = ticker_obj.summary_detail[ticker].get("dividendRate")
         if not dividend_rate_value:
-            dividend_rate.append([None])
+            dividend_rate.append(["NA"])
         else:
             dividend_rate.append([dividend_rate_value])
 
@@ -114,43 +108,39 @@ def main():
     whs.batch_update(
         [
             {
-                "range": "D2" + ":D" + str(last_row),
+                "range": f"C2:C{last_row}",
                 "values": close_price,
             },
             {
-                "range": "E2" + ":E" + str(last_row),
+                "range": f"D2:D{last_row}",
                 "values": price_low,
             },
             {
-                "range": "F2" + ":F" + str(last_row),
+                "range": f"E2:E{last_row}",
                 "values": price_high,
             },
             {
-                "range": "H2" + ":H" + str(last_row),
+                "range": f"G2:G{last_row}",
                 "values": market_cap,
             },
             {
-                "range": "I2" + ":I" + str(last_row),
+                "range": f"H2:H{last_row}",
                 "values": yearly_revenue,
             },
             {
-                "range": "J2" + ":J" + str(last_row),
+                "range": f"I2:I{last_row}",
                 "values": yearly_earnings,
             },
             {
-                "range": "K2" + ":K" + str(last_row),
+                "range": f"J2:J{last_row}",
                 "values": trailing_eps,
             },
             {
-                "range": "L2" + ":K" + str(last_row),
-                "values": trailing_pe,
-            },
-            {
-                "range": "M2" + ":M" + str(last_row),
+                "range": f"L2:L{last_row}",
                 "values": dividend_rate,
             },
             {
-                "range": "O2" + ":O" + str(last_row),
+                "range": f"N2:N{last_row}",
                 "values": stock_sector,
             },
         ]
